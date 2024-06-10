@@ -41,7 +41,7 @@ const SubCourseUpdate = () => {
   useEffect(() => {
     const fetchAllCourses = async () => {
       try {
-        const response = await axios.get(`https://comfortable-boot-fly.cyclic.app/api/allcourses/${id}`);
+        const response = await axios.get(`http://localhost:3500/api/allcourses/${id}`);
         setLoading(false)
         console.log(response.data);
         setCourseData({

@@ -24,7 +24,7 @@ function ImageStore() {
     formDataUpload.append('image', formData.image);
 
     // Send a POST request to create a new image using FormData
-    axios.post('https://comfortable-boot-fly.cyclic.app/aws/upload', formDataUpload)
+    axios.post('https://api.be-practical.com/aws/upload', formDataUpload)
   .then((response) => {
     console.log('Response:', response);
     alert('Image uploaded successfully');

@@ -53,7 +53,7 @@ function Job() {
     e.preventDefault(); // Prevent the default form submission
 
     axios
-      .post('http://localhost:3200/api/job', BlogsData)
+      .post('https://api.be-practical.com/api/job', BlogsData)
       .then((response) => {
         console.log(response.data);
         alert('success');

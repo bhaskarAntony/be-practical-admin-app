@@ -14,16 +14,50 @@ function BlogPost() {
     }
   }, []);
 
-  const modules = {
-    toolbar: {
-      container: [
-        ['bold', 'italic', 'underline', 'strike'],
-        [{ 'align': [] }],
-        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-        ['link', 'image'],
-        ['table'],
-      ],
-    },
+ // Image handler function
+ const handleImageInsertion = () => {
+  const input = document.createElement('input');
+  input.setAttribute('type', 'file');
+  input.setAttribute('accept', 'image/*');
+  input.click();
+
+  input.onchange = () => {
+      const file = input.files[0];
+      if (file) {
+          const reader = new FileReader();
+          reader.onload = async () => {
+              const dataUrl = reader.result;
+              const quill = quillRef.current.getEditor();
+              const range = quill.getSelection();
+              quill.insertEmbed(range ? range.index : 0, 'image', dataUrl);
+          };
+          reader.readAsDataURL(file);
+      }
+  };
+};
+
+
+   // Function to insert text into editor
+   const handleTextInsertion = () => {
+    const quill = quillRef.current.getEditor();
+    const range = quill.getSelection();
+    quill.insertText(range ? range.index : 0, 'Your text here');
+};
+
+     // Quill modules
+     const modules = {
+      toolbar: {
+          container: [
+              [{ 'header': '1'}, {'header': '2'}, { 'font': [] }],
+              [{size: []}],
+              ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+              [{'list': 'ordered'}, {'list': 'bullet'}, 
+              {'indent': '-1'}, {'indent': '+1'}],
+              ['image'], // Include 'image' in the toolbar
+              ['link'],
+              ['clean']                                         
+          ]
+      }
   };
   const [BlogsData, setBlogsData] = useState({
     title: '',
@@ -45,7 +79,7 @@ function BlogPost() {
     e.preventDefault(); // Prevent the default form submission
 
     axios
-      .post('http://localhost:3300/api/blogs/add', BlogsData)
+      .post('https://api.be-practical.com/api/blogs/add', BlogsData)
       .then((response) => {
         console.log(response.data);
         alert('success');
@@ -113,7 +147,18 @@ function BlogPost() {
           </div>
         </div>
 
-        <ReactQuill  ref={quillRef}   modules={modules} value={BlogsData.content} onChange={handleContentChange} className='editor' />
+        
+        <div>
+            <button onClick={handleImageInsertion}>Insert Image</button>
+            <button onClick={handleTextInsertion}>Insert Text</button>
+            <ReactQuill
+                ref={quillRef}
+                modules={modules}
+                value={BlogsData.content}
+                onChange={handleContentChange}
+                className='editor'
+            />
+        </div>
         <button type='submit' className='btn btn-danger px-3 mt-3 mx-3'>
          Reset
         </button>

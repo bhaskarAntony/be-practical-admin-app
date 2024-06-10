@@ -1,7 +1,7 @@
 // apiService.js
 import axios from 'axios';
 
-const BASE_URL = 'https://comfortable-boot-fly.cyclic.app/api'; // Replace with your API endpoint
+const BASE_URL = 'https://api.be-practical.com/api'; // Replace with your API endpoint
 
 export const createCourse = async (courseData) => {
   try {

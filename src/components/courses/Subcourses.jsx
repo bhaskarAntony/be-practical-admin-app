@@ -41,7 +41,7 @@ const Subcourses = () => {
   useEffect(() => {
     const fetchAllCourses = async () => {
       try {
-        const response = await axios.get('https://comfortable-boot-fly.cyclic.app/api/allcourses');
+        const response = await axios.get('https://api.be-practical.com/api/allcourses');
         setLoading(false)
         console.log(response.data.courses);
         setAllCourses(response.data.courses)
@@ -93,7 +93,7 @@ const Subcourses = () => {
     setLoading(true)
     console.log(courseData);
     try {
-      const response = await axios.post(`http://localhost:3300/api/allcourses/${courseId}/subcourses`, courseData);
+      const response = await axios.post(`http://localhost:3500/api/allcourses/${courseId}/subcourses`, courseData);
       console.log(response.data); // Log response data to see server's response
       setLoading(false)
       alert('Course uploaded successfully');

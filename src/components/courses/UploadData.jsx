@@ -17,6 +17,7 @@ const UploadDatas = () => {
     certification:'',
     courseFor:'',
     subCourses:[],
+    modules:[],
     Benifits:'',
     Designation:'',
     AnnualSalary:'',
@@ -49,6 +50,12 @@ const UploadDatas = () => {
     } else {
       setCourseData({ ...courseData, [key]: value });
     }
+  };
+  const handleAddModule = () => {
+    setCourseData((prevData) => ({
+      ...prevData,
+      modules: [...prevData.modules, { title: '', description: '' }],
+    }));
   };
 
   const handleAddFAQ = () => {
@@ -320,6 +327,45 @@ const UploadDatas = () => {
         ))}
         <button className='main-btn' onClick={handleAddFAQ}>Add FAQ</button>
       </div> */}
+         <div className="module bg-white p-3 mb-4 border">
+     <h2 className='fs-3  mb-4'>Modules</h2>
+      {courseData.modules.map((module, index) => (
+  <div key={index}>
+    <label htmlFor="module" className='form-label'>modules</label>
+    <input
+      type="text"
+      placeholder="Title"
+      className='form-control'
+      value={module.title}
+      onChange={(e) =>
+        setCourseData((prevData) => ({
+          ...prevData,
+          modules: prevData.modules.map((item, i) =>
+            i === index ? { ...item, title: e.target.value } : item
+          ),
+        }))
+      }
+    />
+    <textarea
+      type="text"
+      placeholder="Description"
+      value={module.description}
+      className='form-control'
+      onChange={(e) =>
+        setCourseData((prevData) => ({
+          ...prevData,
+          modules: prevData.modules.map((item, i) =>
+            i === index ? { ...item, description: e.target.value } : item
+          ),
+        }))
+      }
+    />
+  </div>
+))}
+
+      <button  className='main-btn' onClick={handleAddModule}>Add Module</button>
+
+     </div>
        <div className="faq bg-white p-3 mb-4 border">
      <h2 className='fs-3  mb-4'>FAQs</h2>
       {courseData.faqs.map((faq, index) => (

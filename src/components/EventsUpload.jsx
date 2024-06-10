@@ -19,7 +19,7 @@ function EventsUpload({ onUpload }) {
 
   const handleEventUpload = () => {
     // Send a POST request to create a new event using formData.
-    axios.post('https://fancy-mittens-ray.cyclic.app/api/past-events/add', formData)
+    axios.post('https://api.be-practical.com/api/past-events/add', formData)
       .then((response) => {
         // Handle success and add the new event to the list.
         onUpload(response.data);

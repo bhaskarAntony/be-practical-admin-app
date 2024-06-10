@@ -17,7 +17,7 @@ function Gallery() {
       
         const handleEventUpload = () => {
             // Send a POST request to create a new event using formData.
-            axios.post('https://fancy-mittens-ray.cyclic.app/api/youtubeVideos', formData)
+            axios.post('https://api.be-practical.com/api/youtubeVideos', formData)
             .then((response) => {
                 console.log(response.data)
                 alert("success")

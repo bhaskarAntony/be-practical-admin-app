@@ -42,7 +42,7 @@ const UpdateSubCourse = () => {
   useEffect(() => {
     const fetchAllCourses = async () => {
       try {
-        const response = await axios.get(`https://comfortable-boot-fly.cyclic.app/api/allcourses/${id}/subcourses/${subCourseId}`);
+        const response = await axios.get(`https://api.be-practical.com/api/allcourses/${id}/subcourses/${subCourseId}`);
         setLoading(false)
         console.log(response.data);
         setCourseData({

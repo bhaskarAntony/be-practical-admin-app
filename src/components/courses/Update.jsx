@@ -1,83 +1,103 @@
 import React, { useEffect, useState } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import { createCourse, updateCourse } from '../../Data/apiService';
+import { updateCourse } from '../../Data/apiService';
 import Loading from '../Loading';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 
 const Update = () => {
-    const {id} = useParams()
-    const [loading, setLoading] = useState(false)
+  const { id } = useParams();
+  const [loading, setLoading] = useState(false);
   const [courseData, setCourseData] = useState({
-    tag:'',
+    tag: '',
     courseName: '',
-    courseImage:'',
+    courseImage: '',
     heroSubtitle: '',
-    coursePoints:'',
+    coursePoints: '',
     BrocherLink: '',
     courseDescription: '',
-    certification:'',
-    courseFor:'',
-    subCourses:[],
-    Benifits:'',
-    Designation:'',
-    AnnualSalary:'',
+    certification: '',
+    courseFor: '',
+    subCourses: [],
+    modules: [],
+    Benifits: '',
+    Designation: '',
+    AnnualSalary: '',
     faqs: [],
     programmingLanguages: [],
-    seo:{
-      title:'',
-      description:'',
-      keywords:'',
-      Tag_H1:'',
-      canonical_url:''
+    seo: {
+      title: '',
+      description: '',
+      keywords: '',
+      Tag_H1: '',
+      canonical_url: ''
     },
-    details:{
-      Instructor:'',
-      Duration:'',
-      admisionStart:''
+    details: {
+      Instructor: '',
+      Duration: '',
+      admisionStart: ''
     },
   });
+
   useEffect(() => {
     const fetchAllCourses = async () => {
       try {
-        const response = await axios.get(`https://be-practical-admin-pannel.vercel.app//api/allcourses/${id}`);
-        setLoading(false)
-        console.log(response.data);
+        const response = await axios.get(`https://api.be-practical.com/api/allcourses/${id}`);
+        setLoading(false);
         setCourseData({
-            ...response.data, // Spread the response data
-            subCourses: [], // Initialize subCourses array, as it's not available in the response
-          });
-
+          ...response.data,
+          subCourses: response.data.subCourses || [],
+          modules: response.data.modules || [],
+          faqs: response.data.faqs || [],
+          programmingLanguages: response.data.programmingLanguages || [],
+        });
       } catch (error) {
-        setLoading(false)
+        setLoading(false);
         console.error('Error fetching courses:', error);
       }
     };
 
+    setLoading(true);
     fetchAllCourses();
-    console.log(courseData)
-  }, []);
+  }, [id]);
 
   const handleChange = (key, value) => {
     if (key.includes('.')) {
-      const [parentKey, nestedKey] = key.split('.');
-      setCourseData({
-        ...courseData,
-        [parentKey]: {
-          ...courseData[parentKey],
-          [nestedKey]: value
+      const keys = key.split('.');
+      setCourseData((prevData) => {
+        let newData = { ...prevData };
+        let ref = newData;
+        for (let i = 0; i < keys.length - 1; i++) {
+          ref = ref[keys[i]];
         }
+        ref[keys[keys.length - 1]] = value;
+        return newData;
       });
     } else {
       setCourseData({ ...courseData, [key]: value });
     }
   };
 
+  const handleNestedChange = (index, field, value, type) => {
+    setCourseData((prevData) => {
+      const newArray = [...prevData[type]];
+      newArray[index] = { ...newArray[index], [field]: value };
+      return { ...prevData, [type]: newArray };
+    });
+  };
+
   const handleAddFAQ = () => {
     setCourseData((prevData) => ({
       ...prevData,
       faqs: [...prevData.faqs, { question: '', answer: '' }],
+    }));
+  };
+
+  const handleAddModule = () => {
+    setCourseData((prevData) => ({
+      ...prevData,
+      modules: [...prevData.modules, { title: '', description: '' }],
     }));
   };
 
@@ -88,126 +108,131 @@ const Update = () => {
     }));
   };
 
+  const handleRemoveItem = (index, type) => {
+    setCourseData((prevData) => {
+      const newArray = [...prevData[type]];
+      newArray.splice(index, 1);
+      return { ...prevData, [type]: newArray };
+    });
+  };
+
   const handleUpload = async () => {
     console.log(courseData);
-    setLoading(true)
+    setLoading(true);
     try {
       const response = await updateCourse(courseData, id);
-      setLoading(false)
+      setLoading(false);
       alert('Course updated successfully:', response);
     } catch (error) {
-        setLoading(false)
+      setLoading(false);
       alert('Error on updating course:', error.message);
     }
-    console.log(courseData)
   };
-  if(loading){
-    return <Loading/>
+
+  if (loading) {
+    return <Loading />;
   }
 
   return (
     <div className='course-upload container-fluid p-3 light-bg'>
       <div className="course-details bg-white mb-4 p-3 border">
-        
         <div className="row">
-            <div className="col-12">
-                <div className="row">
-                    <h1 className='fs-4'>SEO</h1>
-                    <hr />
-                    <div className="col-12 col-md-3">
-                    <label htmlFor="" className="form-label">Title</label>
-                    <input
-                    type="text"
-                    placeholder='Course  Tag'
-                    className='form-control'
-                    value={courseData?.seo?.title}
-                    onChange={(e) => handleChange('seo.title', e.target.value)}
-                    />
-                    </div>
-                    <div className="col-12 col-md-3">
-                    <label htmlFor="" className="form-label">description</label>
-                    <input
-                    type="text"
-                    placeholder='seo description'
-                    className='form-control'
-                    value={courseData.seo.description}
-                    onChange={(e) => handleChange('seo.description', e.target.value)}
-                    />
-                    </div>
-                    <div className="col-12 col-md-3">
-                    <label htmlFor="" className="form-label">Keywords</label>
-                    <input
-                    type="text"
-                    placeholder='Seo Keywords'
-                    className='form-control'
-                    value={courseData.seo.keywords}
-                    onChange={(e) => handleChange('seo.keywords', e.target.value)}
-                    />
-                    </div>
-                    <div className="col-12 col-md-3">
-                    <label htmlFor="" className="form-label">H1 Tags</label>
-                    <input
-                    type="text"
-                    placeholder='seo h1 tags'
-                    className='form-control'
-                    value={courseData.seo.Tag_H1}
-                    onChange={(e) => handleChange('seo.Tag_H1', e.target.value)}
-                    />
-                    </div>
-                    <div className="col-12 col-md-3">
-                    <label htmlFor="" className="form-label">Canonical URL</label>
-                    <input
-                    type="text"
-                    placeholder='Course  Tag'
-                    className='form-control'
-                    value={courseData.seo.canonical_url}
-                    onChange={(e) => handleChange('seo.canonical_url', e.target.value)}
-                    />
-                    </div>
-                </div>
-                <div className="row">
-                    <hr />
-                    <h1 className='fs-4'>Course Details</h1>
-                    <hr />
-                    <div className="col-12 col-md-3">
-                    <label htmlFor="" className="form-label">Instructor</label>
-                    <input
-                    type="text"
-                    placeholder='Course  Instructor'
-                    className='form-control'
-                    value={courseData.details.Instructor}
-                    onChange={(e) => handleChange('details.Instructor', e.target.value)}
-                    />
-                    </div>
-                    <div className="col-12 col-md-3">
-                    <label htmlFor="" className="form-label">Duration</label>
-                    <input
-                    type="text"
-                    placeholder='Course Duration'
-                    className='form-control'
-                    value={courseData.details.Duration}
-                    onChange={(e) => handleChange('details.Duration', e.target.value)}
-                    />
-                    </div>
-                    <div className="col-12 col-md-3">
-                    <label htmlFor="" className="form-label">admisionStart</label>
-                    <input
-                    type="date"
-                    placeholder='Seo Keywords'
-                    className='form-control'
-                    value={courseData.details.admisionStart}
-                    onChange={(e) => handleChange('details.admisionStart', e.target.value)}
-                    />
-                    </div>
-                 
-                   
-                </div>
+          <div className="col-12">
+            <div className="row">
+              <h1 className='fs-4'>SEO</h1>
+              <hr />
+              <div className="col-12 col-md-3">
+                <label htmlFor="" className="form-label">Title</label>
+                <input
+                  type="text"
+                  placeholder='Course Tag'
+                  className='form-control'
+                  value={courseData?.seo?.title}
+                  onChange={(e) => handleChange('seo.title', e.target.value)}
+                />
+              </div>
+              <div className="col-12 col-md-3">
+                <label htmlFor="" className="form-label">Description</label>
+                <input
+                  type="text"
+                  placeholder='SEO description'
+                  className='form-control'
+                  value={courseData.seo.description}
+                  onChange={(e) => handleChange('seo.description', e.target.value)}
+                />
+              </div>
+              <div className="col-12 col-md-3">
+                <label htmlFor="" className="form-label">Keywords</label>
+                <input
+                  type="text"
+                  placeholder='SEO Keywords'
+                  className='form-control'
+                  value={courseData.seo.keywords}
+                  onChange={(e) => handleChange('seo.keywords', e.target.value)}
+                />
+              </div>
+              <div className="col-12 col-md-3">
+                <label htmlFor="" className="form-label">H1 Tags</label>
+                <input
+                  type="text"
+                  placeholder='SEO H1 tags'
+                  className='form-control'
+                  value={courseData.seo.Tag_H1}
+                  onChange={(e) => handleChange('seo.Tag_H1', e.target.value)}
+                />
+              </div>
+              <div className="col-12 col-md-3">
+                <label htmlFor="" className="form-label">Canonical URL</label>
+                <input
+                  type="text"
+                  placeholder='Canonical URL'
+                  className='form-control'
+                  value={courseData.seo.canonical_url}
+                  onChange={(e) => handleChange('seo.canonical_url', e.target.value)}
+                />
+              </div>
             </div>
-        <div className="col-12">
-            <label htmlFor="" className="form-label">Course tag</label>
+            <div className="row">
+              <hr />
+              <h1 className='fs-4'>Course Details</h1>
+              <hr />
+              <div className="col-12 col-md-3">
+                <label htmlFor="" className="form-label">Instructor</label>
+                <input
+                  type="text"
+                  placeholder='Course Instructor'
+                  className='form-control'
+                  value={courseData.details.Instructor}
+                  onChange={(e) => handleChange('details.Instructor', e.target.value)}
+                />
+              </div>
+              <div className="col-12 col-md-3">
+                <label htmlFor="" className="form-label">Duration</label>
+                <input
+                  type="text"
+                  placeholder='Course Duration'
+                  className='form-control'
+                  value={courseData.details.Duration}
+                  onChange={(e) => handleChange('details.Duration', e.target.value)}
+                />
+              </div>
+              <div className="col-12 col-md-3">
+                <label htmlFor="" className="form-label">Admission Start</label>
+                <input
+                  type="date"
+                  placeholder='Admission Start'
+                  className='form-control'
+                  value={courseData.details.admisionStart}
+                  onChange={(e) => handleChange('details.admisionStart', e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+          <div className="col-12">
+            <label htmlFor="" className="form-label">Course Tag</label>
             <input
               type="text"
-              placeholder='Course  Tag'
+              placeholder='Course Tag'
               className='form-control'
               value={courseData.tag}
               onChange={(e) => handleChange('tag', e.target.value)}
@@ -224,7 +249,7 @@ const Update = () => {
             />
           </div>
           <div className="col-12">
-          <label htmlFor="" className="form-label">Brocher Link</label>
+            <label htmlFor="" className="form-label">Brochure Link</label>
             <input
               type="text"
               placeholder='Brochure Link'
@@ -234,17 +259,17 @@ const Update = () => {
             />
           </div>
           <div className="col-12">
-          <label htmlFor="" className="form-label">Course Image Url</label>
+            <label htmlFor="" className="form-label">Course Image URL</label>
             <input
               type="text"
-              placeholder='course Image'
+              placeholder='Course Image'
               className='form-control'
               value={courseData.courseImage}
               onChange={(e) => handleChange('courseImage', e.target.value)}
             />
           </div>
           <div className="col-12">
-          <label htmlFor="" className="form-label">Hero Subtitle</label>
+            <label htmlFor="" className="form-label">Hero Subtitle</label>
             <input
               type="text"
               placeholder='Hero Subtitle'
@@ -254,46 +279,59 @@ const Update = () => {
             />
           </div>
           <div className="col-12">
-          <label htmlFor="" className="form-label">Course Description</label>
+            <label htmlFor="" className="form-label">Course Points</label>
+            <input
+              type="text"
+              placeholder='Course Points'
+              className='form-control'
+              value={courseData.coursePoints}
+              onChange={(e) => handleChange('coursePoints', e.target.value)}
+            />
+          </div>
+          <div className="col-12">
+            <label htmlFor="" className="form-label">Course Description</label>
             <ReactQuill
               value={courseData.courseDescription}
               onChange={(value) => handleChange('courseDescription', value)}
-              className='form-control p-0 border-0'
+              placeholder='Course Description'
             />
           </div>
           <div className="col-12">
-          <label htmlFor="" className="form-label">Course Certification</label>
+            <label htmlFor="" className="form-label">Certification</label>
             <ReactQuill
               value={courseData.certification}
               onChange={(value) => handleChange('certification', value)}
-              className='form-control p-0 border-0'
+              placeholder='Certification'
             />
           </div>
           <div className="col-12">
-          <label htmlFor="" className="form-label">Course Course for</label>
-            {/* <input
-              type="text"
-              placeholder='Course For'
-              className='form-control'
-              value={courseData.courseFor}
-              onChange={(e) => handleChange('courseFor', e.target.value)}
-            /> */}
-             <ReactQuill
+            <label htmlFor="" className="form-label">Course For</label>
+            <ReactQuill
               value={courseData.courseFor}
               onChange={(value) => handleChange('courseFor', value)}
-              className='form-control p-0 border-0'
+              placeholder='Course For'
             />
           </div>
           <div className="col-12">
-          <label htmlFor="" className="form-label">Designation</label>
+            <label htmlFor="" className="form-label">Benefits</label>
             <ReactQuill
-              value={courseData.Designation}
-              onChange={(value) => handleChange('Designation', value)}
-              className='form-control p-0 border-0'
+              value={courseData.Benifits}
+              onChange={(value) => handleChange('Benifits', value)}
+              placeholder='Benefits'
             />
           </div>
           <div className="col-12">
-          <label htmlFor="" className="form-label">Annual Salary description</label>
+            <label htmlFor="" className="form-label">Designation</label>
+            <input
+              type="text"
+              placeholder='Designation'
+              className='form-control'
+              value={courseData.Designation}
+              onChange={(e) => handleChange('Designation', e.target.value)}
+            />
+          </div>
+          <div className="col-12">
+            <label htmlFor="" className="form-label">Annual Salary</label>
             <input
               type="text"
               placeholder='Annual Salary'
@@ -303,128 +341,136 @@ const Update = () => {
             />
           </div>
           <div className="col-12">
-          <label htmlFor="" className="form-label">Course Points</label>
-            <ReactQuill
-              value={courseData.coursePoints}
-              onChange={(value) => handleChange('coursePoints', value)}
-              className='form-control p-0 border-0'
-            />
+            <div className="row">
+              <hr />
+              <h1 className='fs-4'>FAQs</h1>
+              <hr />
+              {courseData.faqs.map((faq, index) => (
+                <React.Fragment key={index}>
+                  <div className="col-12 col-md-6">
+                    <label htmlFor="" className="form-label">Question {index + 1}</label>
+                    <input
+                      type="text"
+                      placeholder='Question'
+                      className='form-control'
+                      value={faq.question}
+                      onChange={(e) => handleNestedChange(index, 'question', e.target.value, 'faqs')}
+                    />
+                  </div>
+                  <div className="col-12 col-md-6">
+                    <label htmlFor="" className="form-label">Answer {index + 1}</label>
+                    <input
+                      type="text"
+                      placeholder='Answer'
+                      className='form-control'
+                      value={faq.answer}
+                      onChange={(e) => handleNestedChange(index, 'answer', e.target.value, 'faqs')}
+                    />
+                  </div>
+                  <div className="col-12 text-end">
+                    <button
+                      className='btn btn-danger mt-2'
+                      onClick={() => handleRemoveItem(index, 'faqs')}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </React.Fragment>
+              ))}
+              <div className="col-12">
+                <button className='btn btn-secondary mt-2' onClick={handleAddFAQ}>Add More</button>
+              </div>
+            </div>
           </div>
           <div className="col-12">
-          <label htmlFor="" className="form-label">Course Benifits</label>
-            <ReactQuill
-              value={courseData.Benifits}
-              onChange={(value) => handleChange('Benifits', value)}
-              className='form-control p-0 border-0'
-            />
+            <div className="row">
+              <hr />
+              <h1 className='fs-4'>Modules</h1>
+              <hr />
+              {courseData.modules.map((module, index) => (
+                <React.Fragment key={index}>
+                  <div className="col-12 col-md-6">
+                    <label htmlFor="" className="form-label">Title {index + 1}</label>
+                    <input
+                      type="text"
+                      placeholder='Title'
+                      className='form-control'
+                      value={module.title}
+                      onChange={(e) => handleNestedChange(index, 'title', e.target.value, 'modules')}
+                    />
+                  </div>
+                  <div className="col-12 col-md-6">
+                    <label htmlFor="" className="form-label">Description {index + 1}</label>
+                    <input
+                      type="text"
+                      placeholder='Description'
+                      className='form-control'
+                      value={module.description}
+                      onChange={(e) => handleNestedChange(index, 'description', e.target.value, 'modules')}
+                    />
+                  </div>
+                  <div className="col-12 text-end">
+                    <button
+                      className='btn btn-danger mt-2'
+                      onClick={() => handleRemoveItem(index, 'modules')}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </React.Fragment>
+              ))}
+              <div className="col-12">
+                <button className='btn btn-secondary mt-2' onClick={handleAddModule}>Add More</button>
+              </div>
+            </div>
+          </div>
+          <div className="col-12">
+            <div className="row">
+              <hr />
+              <h1 className='fs-4'>Programming Languages</h1>
+              <hr />
+              {courseData.programmingLanguages.map((language, index) => (
+                <React.Fragment key={index}>
+                  <div className="col-12 col-md-6">
+                    <label htmlFor="" className="form-label">Language {index + 1}</label>
+                    <input
+                      type="text"
+                      placeholder='Language'
+                      className='form-control'
+                      value={language.name}
+                      onChange={(e) => handleNestedChange(index, 'name', e.target.value, 'programmingLanguages')}
+                    />
+                  </div>
+                  <div className="col-12 col-md-6">
+                    <label htmlFor="" className="form-label">Image URL {index + 1}</label>
+                    <input
+                      type="text"
+                      placeholder='Image URL'
+                      className='form-control'
+                      value={language.image}
+                      onChange={(e) => handleNestedChange(index, 'image', e.target.value, 'programmingLanguages')}
+                    />
+                  </div>
+                  <div className="col-12 text-end">
+                    <button
+                      className='btn btn-danger mt-2'
+                      onClick={() => handleRemoveItem(index, 'programmingLanguages')}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </React.Fragment>
+              ))}
+              <div className="col-12">
+                <button className='btn btn-secondary mt-2' onClick={handleAddLanguage}>Add More</button>
+              </div>
+            </div>
+          </div>
+          <div className="col-12">
+            <button className='btn btn-primary mt-3' onClick={handleUpload}>Upload</button>
           </div>
         </div>
       </div>
-      
-      {/* <div className="faq bg-white p-3 mb-4 border">
-        <h2 className='fs-3 mb-4'>FAQs</h2>
-        {courseData.faqs.map((faq, index) => (
-          <div key={index}>
-            <input
-              type="text"
-              placeholder="Question"
-              className='form-control'
-              value={faq.question}
-              onChange={(e) => handleChange(`faqs[${index}].question`, e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="Answer"
-              className='form-control'
-              value={faq.answer}
-              onChange={(e) => handleChange(`faqs[${index}].answer`, e.target.value)}
-            />
-          </div>
-        ))}
-        <button className='main-btn' onClick={handleAddFAQ}>Add FAQ</button>
-      </div> */}
-       <div className="faq bg-white p-3 mb-4 border">
-     <h2 className='fs-3  mb-4'>FAQs</h2>
-      {courseData.faqs.map((faq, index) => (
-  <div key={index}>
-    <label htmlFor="faq" className='form-label'>frequently asked question</label>
-    <input
-      type="text"
-      placeholder="Question"
-      className='form-control'
-      value={faq.question}
-      onChange={(e) =>
-        setCourseData((prevData) => ({
-          ...prevData,
-          faqs: prevData.faqs.map((item, i) =>
-            i === index ? { ...item, question: e.target.value } : item
-          ),
-        }))
-      }
-    />
-    <textarea
-      type="text"
-      placeholder="Answer"
-      value={faq.answer}
-      className='form-control'
-      onChange={(e) =>
-        setCourseData((prevData) => ({
-          ...prevData,
-          faqs: prevData.faqs.map((item, i) =>
-            i === index ? { ...item, answer: e.target.value } : item
-          ),
-        }))
-      }
-    />
-  </div>
-))}
-
-      <button  className='main-btn' onClick={handleAddFAQ}>Add FAQ</button>
-
-     </div>
-
-     <div className="faq bg-white p-3 mb-4 border">
-     <h2 className='fs-3  mb-4'>Programming Languges</h2>
-      {courseData.programmingLanguages.map((language, index) => (
-  <div key={index}>
-    <label htmlFor="programmingLanguages" className='form-label'>programming Languages</label>
-    <input
-      type="text"
-      placeholder="name"
-      className='form-control'
-      value={language.name}
-      onChange={(e) =>
-        setCourseData((prevData) => ({
-          ...prevData,
-          programmingLanguages: prevData.programmingLanguages.map((item, i) =>
-            i === index ? { ...item, name: e.target.value } : item
-          ),
-        }))
-      }
-    />
-    <textarea
-      type="text"
-      placeholder="programmingLanguages image"
-      value={language.image}
-      className='form-control'
-      onChange={(e) =>
-        setCourseData((prevData) => ({
-          ...prevData,
-          programmingLanguages: prevData.programmingLanguages.map((item, i) =>
-            i === index ? { ...item, image: e.target.value } : item
-          ),
-        }))
-      }
-    />
-  </div>
-))}
-
-      <button  className='main-btn' onClick={handleAddLanguage}>Add Language</button>
-
-     </div>
-
-      <button onClick={handleUpload} className='main-btn fs-5 px-5'>Upload Course</button>
-      
     </div>
   );
 };

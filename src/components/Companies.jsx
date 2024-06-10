@@ -16,7 +16,7 @@ function Companies() {
       
         const handleEventUpload = () => {
             // Send a POST request to create a new event using formData.
-            axios.post('https://fancy-mittens-ray.cyclic.app/api/companies', formData)
+            axios.post('https://api.be-practical.com/api/companies', formData)
             .then((response) => {
                 console.log(response.data)
                 alert("success")

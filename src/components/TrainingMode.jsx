@@ -18,7 +18,7 @@ function TrainingMode() {
       
         const handleEventUpload = () => {
             // Send a POST request to create a new event using formData.
-            axios.post('https://fancy-mittens-ray.cyclic.app/api/trainingmodes', formData)
+            axios.post('https://api.be-practical.com/api/trainingmodes', formData)
             .then((response) => {
                 console.log(response.data)
             })

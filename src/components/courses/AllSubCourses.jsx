@@ -9,7 +9,7 @@ function AllSubCourses() {
     useEffect(() => {
         const fetchAllCourses = async () => {
           try {
-            const response = await axios.get(`https://comfortable-boot-fly.cyclic.app/api/allcourses/${id}`);
+            const response = await axios.get(`https://api.be-practical.com/api/allcourses/${id}`);
             setLoading(false)
             console.log(response);
             setAllCourses(response.data)
